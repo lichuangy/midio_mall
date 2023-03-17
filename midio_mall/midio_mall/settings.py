@@ -27,7 +27,7 @@ SECRET_KEY = 'bw$npjbx*uw@ch=@uu%ea#6q%p$-&4*v8x13645^li1qz9wous'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['www.midio.com', '127.0.0.1']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'apps.user'
+    'apps.user',
 ]
 
 MIDDLEWARE = [
