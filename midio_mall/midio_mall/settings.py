@@ -155,3 +155,48 @@ CACHES = {
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 # 指明使用哪一个库保存session数据
 SESSION_CACHE_ALIAS = "session"
+
+
+# ##################################log日志###################################
+
+# 配置工程日志
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False, # 是否禁用已经存在的日志器
+    'formatters': {  # 输出日志的格式
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(lineno)d %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(module)s %(lineno)d %(message)s'
+        },
+    },
+    'filters': {  # 对日志进行过滤
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'handlers': { # 日志的处理方式
+        'console': {  # 终端输出日志
+            'level': 'INFO',  # 大于INFO级别，才输出
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple' # 输出简单的样式
+        },
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR , "logs/meiduo.log"),  # 日志文件的位置
+            'maxBytes': 300 * 1024 * 1024,  # 文件最多存储 300M 的内存   日志文件满了，他会自动新建meiduo1 meiduo2
+            'backupCount': 10, # 最多十个文件
+            'formatter': 'verbose'
+        },
+    },
+    'loggers': {
+        'django': {  # 定义了一个名为django的日志器
+            'handlers': ['console', 'file'], # 可以同时在终端跟文件中输出
+            'propagate': True,
+            'level;':'INFO' # 日至输出的最低级别
+        },
+    }
+}

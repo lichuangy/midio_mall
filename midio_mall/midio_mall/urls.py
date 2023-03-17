@@ -15,7 +15,19 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
+from django.http import HttpResponse
+
+def log(request):
+    import logging
+
+    logger = logging.getLogger('djanbo')
+    logger.info('user has benn login...')
+    logger.warning('redis memmory not satistation!')
+    logger.error('the log not exist!')
+    logger.debug('~~~~~~~~~')
+    return HttpResponse('log')
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'^log/', log),
 ]
