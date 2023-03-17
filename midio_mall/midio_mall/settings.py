@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
+# ctrl+k 来进行 add 和 commit操作
+# ctrl+shift+k来进行 push操作
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
