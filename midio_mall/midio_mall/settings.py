@@ -201,3 +201,8 @@ LOGGING = {
         },
     }
 }
+
+#############################################################
+#通过提供一个值给AUTH_USER_MODEL设置 ， 指向自定义的模型，Django允许你覆盖默认的User模型：
+#AUTH_USER_MODEL='appname.UserModel' 这个值是app名字(apps/user)和模块名，中间使用点连接，不用指定模块名。这点要注意。
+AUTH_USER_MODEL= 'user.User'
