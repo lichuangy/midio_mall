@@ -27,7 +27,7 @@ SECRET_KEY = 'bw$npjbx*uw@ch=@uu%ea#6q%p$-&4*v8x13645^li1qz9wous'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['www.meiduo.site', '127.0.0.1']
 
 
 # Application definition
@@ -40,9 +40,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'apps.user',
+    #CORS
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    #CORS中间层
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -206,3 +210,14 @@ LOGGING = {
 #通过提供一个值给AUTH_USER_MODEL设置 ， 指向自定义的模型，Django允许你覆盖默认的User模型：
 #AUTH_USER_MODEL='appname.UserModel' 这个值是app名字(apps/user)和模块名，中间使用点连接，不用指定模块名。这点要注意。
 AUTH_USER_MODEL= 'user.User'
+
+#######CORS#################################
+# 配置访问规则或白名单:
+CORS_ORIGIN_WHITELIST = (
+    'http://127.0.0.1:8080',
+    'http://localhost:8080',
+    'http://www.midio.com:8080',
+)
+# 允许所有域名跨域(优先选择) /允许跨域源 二选一 allow..：一般用这个，新出来的
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True

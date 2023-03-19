@@ -1,3 +1,5 @@
+import re
+
 from django.shortcuts import render
 """
 前端：当用户输入用户名后，失去焦点，发送axios(ajax)请求
@@ -23,10 +25,13 @@ from django.shortcuts import render
 from django.views import View
 from apps.user.models import User
 from django.http import JsonResponse
+import re
 class UsernameCountView(View):
     def get(self, request, username):
         # 1.接收用户名
         # 2.根据用户名查询数据库
         count = User.objects.filter(username=username).count()
+        if not re.match('[a-zA-Z0-9_-]{5,50}',username):
+            return JsonResponse({'code': 200, 'count': count, "errmsg": 'username  model is not use'})
         # 3.返回响应
         return JsonResponse({'code': 0, 'count': count, "errmsg": 'ok'})

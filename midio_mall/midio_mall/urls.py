@@ -19,15 +19,20 @@ from django.http import HttpResponse
 from django.urls import include
 
 
-def log(request):
-    import logging
+# def log(request):
+#     import logging
+#
+#     logger = logging.getLogger('djanbo')
+#     logger.info('user has benn login...')
+#     logger.warning('redis memmory not satistation!')
+#     logger.error('the log not exist!')
+#     logger.debug('~~~~~~~~~')
+#     return HttpResponse('log')
 
-    logger = logging.getLogger('djanbo')
-    logger.info('user has benn login...')
-    logger.warning('redis memmory not satistation!')
-    logger.error('the log not exist!')
-    logger.debug('~~~~~~~~~')
-    return HttpResponse('log')
+from utils.converter import UserNameConvert
+from django.urls import register_converter
+
+register_converter(UserNameConvert, 'username')
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
