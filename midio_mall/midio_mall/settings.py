@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'apps.user',
     #CORS
     'corsheaders',
+    'apps.verifications',
 ]
 
 MIDDLEWARE = [
@@ -151,6 +152,15 @@ CACHES = {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
     },
+
+    "imagecode": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",  # session采用1号redis库
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+    },
+
 }
 # # session存储机制 使用redis保存
 # SESSION_ENGINE = "django.contrib.sessions.backends.cache"

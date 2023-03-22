@@ -27,7 +27,6 @@ from django.views import View
 from apps.user.models import User
 from django.http import JsonResponse
 import re
-
 class UsernameCountView(View):
     def get(self, request, username):
         # 1.接收用户名
@@ -75,31 +74,32 @@ class RegistereView(View):
         password2 = body_dict.get('password2')
         mobile = body_dict.get('mobile')
         allow = body_dict.get('allow')
+        image_code = body_dict.get('image_code')
 
         # 验证数据
-        if not all([username,password,password2,mobile,allow]):
-            return JsonResponse({'code': 400, 'errmsg': "参数不全"})
+        if not all([username,password,password2,mobile,image_code,allow]):
+            return JsonResponse({'code': 400, 'errmsg': '参数不全'})
         # 判断用户名是否是5-20个字符
         if not re.match(r'^[a-zA-Z0-9_]{5,20}$', username):
-            return JsonResponse({'code': 400, 'errmsg': "username格式有误!"})
+            return http.JsonResponse({'code': 400, 'errmsg': 'username格式有误!'})
         # 判断密码是否是8-20个数字
         if not re.match(r'^[0-9A-Za-z]{8,20}$', password):
-            return JsonResponse({'code': 400, 'errmsg': "password格式有误!"})
+            return http.JsonResponse({'code': 400, 'errmsg': 'password格式有误!'})
         # 判断两次密码是否一致
         if password != password2:
-            return JsonResponse({'code': 400, 'errmsg': "两次输入不对!"})
+            return http.JsonResponse({'code': 400, 'errmsg': '两次输入不对!'})
         # 判断手机号是否合法
         if not re.match(r'^1[3-9]\d{9}$', mobile):
-            return JsonResponse({'code': 400, 'errmsg':" 'mobile格式有误!'"})
+            return http.JsonResponse({'code': 400, 'errmsg': 'mobile格式有误!'})
         # 判断是否勾选用户协议
         if allow != True:
-            return JsonResponse({'code': 400, 'errmsg': "allow格式有误!"})
+            return http.JsonResponse({'code': 400, 'errmsg': 'allow格式有误!'})
 
         # 数据入库
-        User.objects.create_user(
+        User.objects.create(
             username=username,
             password=password,
             mobile=mobile,
         )
         # 返回响应
-        return JsonResponse({'code': 0, 'errmsg': "ok!"})
+        return http.JsonResponse({'code': 0, 'errmsg': 'ok!'})
