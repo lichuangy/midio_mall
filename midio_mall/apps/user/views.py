@@ -1,5 +1,8 @@
 import json
 import re
+import json
+from django.contrib.auth.forms import User
+from django.db.models import Q
 
 from django.shortcuts import render
 """
@@ -59,13 +62,12 @@ class UsernameCountView(View):
 """
 class RegistereView(View):
     def post(self, request):
-        import json
+
         # 1.接收参数：请求体中的JSON数据 request.body
         json_bytes = request.body  # 从请求体中获取原始的JSON数据，bytes类型的
         json_str = json_bytes.decode()  # 将bytes类型的JSON数据，转成JSON字符串
         body_dict = json.loads(json_str)  # 将JSON字符串，转成python的标准字典
         # json_dict = json.loads(request.body.decode())
-
 
 
         # 获取数据
@@ -74,11 +76,11 @@ class RegistereView(View):
         password2 = body_dict.get('password2')
         mobile = body_dict.get('mobile')
         allow = body_dict.get('allow')
-        image_code = body_dict.get('image_code')
+        sms_code = body_dict.get('sms_code')
 
         # 验证数据
-        if not all([username,password,password2,mobile,image_code,allow]):
-            return JsonResponse({'code': 400, 'errmsg': '参数不全'})
+        if not all([username,password,password2,mobile,sms_code,allow]):
+            return JsonResponse({'code': 400, 'errmsg': '参数不全000'})
         # 判断用户名是否是5-20个字符
         if not re.match(r'^[a-zA-Z0-9_]{5,20}$', username):
             return http.JsonResponse({'code': 400, 'errmsg': 'username格式有误!'})
@@ -103,3 +105,67 @@ class RegistereView(View):
         )
         # 返回响应
         return http.JsonResponse({'code': 0, 'errmsg': 'ok!'})
+
+    """
+    登录
+    
+    前端：
+        当用户把用户密码手机号输入完成后，点击登录按钮，这时，前端会发送一个axios请求
+        
+    后端：
+        请求：接收数据，验证数据
+        业务逻辑：验证用户名和密码是否正确， session
+        响应：返回json数据， 0 成功，400失败
+    
+    步骤：
+        1.接收数据
+        2.验证数据
+        3.验证用户名和密码是否正确
+        4.session
+        5.判断是否记住登录
+        6.返回响应
+    """
+
+class LoginView(View):
+    def post(self, request):
+        # 1.接收数据
+        data = json.loads(request.body.decode())
+        username = data.get("username")
+        password = data.get("password")
+        remembered = data.get("remembered")
+
+        # 2.验证数据
+        if not all([username,password]):
+            return JsonResponse({"code": 400, "errmsg":"参数不全"})
+        # 3.验证用户名和密码是否正确
+            #方法一，通过模型根据用户名来查询
+            # User.objects.get(username=username)
+
+        user = User.objects.filter(Q(username=username)|Q(mobile=username)&Q(password=password)).first()
+        if user is None:
+            return JsonResponse({"code": 400, "errmsg": "用户名或者密码错误！"})
+            # 方法二
+#         from django.contrib.auth import authenticate
+# #        authenticate 传递用户名和密码
+# #       如果用户名和密码正确，则返回User信息
+# #       如果不正确，返回none
+# #         user = authenticate(request, username=username, password=password)
+#         user = authenticate(username=username, password=password)
+#         if user is None:
+#             return JsonResponse({"code": 400, "errmsg":"用户名或者密码错误！"})
+#       4.session
+        from django.contrib.auth import login
+        login(request,user)
+        # 判断是否记住登录
+        if remembered is not None:
+            # 不为空，记住登录
+            request.session.set_expiry(None)
+        else:
+            # 否则不记住登录 浏览器关闭，session过期
+            request.session.set_expiry(0)
+
+        # 6.返回响应
+        response = JsonResponse({"code":0, "msg":"OK"})
+        # 设置cookie , 用户首页信息展示用的cookies来获取用户名
+        response.set_cookie('username',user.username)
+        return response

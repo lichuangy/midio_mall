@@ -155,7 +155,7 @@ CACHES = {
 
     "imagecode": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",  # session采用1号redis库
+        "LOCATION": "redis://127.0.0.1:6379/2",  # image采用1号redis库
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
