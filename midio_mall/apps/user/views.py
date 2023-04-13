@@ -204,3 +204,44 @@ class CenterView(LoginRequiredMixin, View):
             "email_active": request.user.email_active,
         }
         return JsonResponse({"code": 0, "msg": "ok","info_data":info_data})
+
+
+
+    """
+    用户中心个人信息邮箱部分
+    
+    前端：当用户输入邮箱后，点击保存，此时发送一个axios请求
+    
+    后端
+        请求          接收请求，获取数据
+        业务逻辑       保存邮箱地址，发送一封激活邮件
+        响应          json code=0
+        
+    路由  PUT 
+    步骤
+        # 1.接收请求
+        # 2.获取数据
+        # 3.保存邮箱地址
+        # 4.发送一封激活邮件
+        # 5.返回响应
+    """
+
+class EmailView(LoginRequiredMixin, View):
+        # 1.接收请求
+    def put(self,request):
+        data = json.loads(request.body.decode())
+         # 2.获取数据
+        email=data.get("email")
+        # 验证数据
+        # if not re.match(r'^[a-zA-Z0-9_]{5,20}$', username):
+        if not re.match(r'^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+$', email):
+            return JsonResponse({"code":400, "errmsg":"邮箱格式错误"})
+        # 3.保存邮箱地址
+        user = request.user
+        user.email = email
+        user.save()
+        # 4.发送一封激活邮件
+
+        # 5.返回响应
+        return JsonResponse({'code':0,'errmas':'ok'})
+
