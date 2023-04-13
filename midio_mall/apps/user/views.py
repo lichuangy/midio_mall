@@ -5,6 +5,7 @@ from django.contrib.auth.forms import User
 from django.db.models import Q
 
 from django.shortcuts import render
+
 """
 前端：当用户输入用户名后，失去焦点，发送axios(ajax)请求
 
@@ -30,15 +31,18 @@ from django.views import View
 from apps.user.models import User
 from django.http import JsonResponse
 import re
+
+
 class UsernameCountView(View):
     def get(self, request, username):
         # 1.接收用户名
         # 2.根据用户名查询数据库
         count = User.objects.filter(username=username).count()
-        if not re.match('[a-zA-Z0-9_-]{5,50}',username):
+        if not re.match('[a-zA-Z0-9_-]{5,50}', username):
             return JsonResponse({'code': 200, 'count': count, "errmsg": 'username  model is not use'})
         # 3.返回响应
         return JsonResponse({'code': 0, 'count': count, "errmsg": 'ok'})
+
 
 """
 前端：	用户输入用户名，密码，确认密码，手机号，是否同意协议后，点击注册按钮
@@ -60,6 +64,8 @@ class UsernameCountView(View):
 数据入库
 返回响应
 """
+
+
 class RegistereView(View):
     def post(self, request):
 
@@ -68,7 +74,6 @@ class RegistereView(View):
         json_str = json_bytes.decode()  # 将bytes类型的JSON数据，转成JSON字符串
         body_dict = json.loads(json_str)  # 将JSON字符串，转成python的标准字典
         # json_dict = json.loads(request.body.decode())
-
 
         # 获取数据
         username = body_dict.get('username')
@@ -79,7 +84,7 @@ class RegistereView(View):
         sms_code = body_dict.get('sms_code')
 
         # 验证数据
-        if not all([username,password,password2,mobile,sms_code,allow]):
+        if not all([username, password, password2, mobile, sms_code, allow]):
             return JsonResponse({'code': 400, 'errmsg': '参数不全000'})
         # 判断用户名是否是5-20个字符
         if not re.match(r'^[a-zA-Z0-9_]{5,20}$', username):
@@ -126,6 +131,7 @@ class RegistereView(View):
         6.返回响应
     """
 
+
 class LoginView(View):
     def post(self, request):
         # 1.接收数据
@@ -135,27 +141,27 @@ class LoginView(View):
         remembered = data.get("remembered")
 
         # 2.验证数据
-        if not all([username,password]):
-            return JsonResponse({"code": 400, "errmsg":"参数不全"})
+        if not all([username, password]):
+            return JsonResponse({"code": 400, "errmsg": "参数不全"})
         # 3.验证用户名和密码是否正确
-            #方法一，通过模型根据用户名来查询
-            # User.objects.get(username=username)
+        # 方法一，通过模型根据用户名来查询
+        # User.objects.get(username=username)
 
-        user = User.objects.filter(Q(username=username)|Q(mobile=username)&Q(password=password)).first()
+        user = User.objects.filter(Q(username=username) | Q(mobile=username) & Q(password=password)).first()
         if user is None:
             return JsonResponse({"code": 400, "errmsg": "用户名或者密码错误！"})
             # 方法二
-#         from django.contrib.auth import authenticate
-# #        authenticate 传递用户名和密码
-# #       如果用户名和密码正确，则返回User信息
-# #       如果不正确，返回none
-# #         user = authenticate(request, username=username, password=password)
-#         user = authenticate(username=username, password=password)
-#         if user is None:
-#             return JsonResponse({"code": 400, "errmsg":"用户名或者密码错误！"})
-#       4.session
+        #         from django.contrib.auth import authenticate
+        # #        authenticate 传递用户名和密码
+        # #       如果用户名和密码正确，则返回User信息
+        # #       如果不正确，返回none
+        # #         user = authenticate(request, username=username, password=password)
+        #         user = authenticate(username=username, password=password)
+        #         if user is None:
+        #             return JsonResponse({"code": 400, "errmsg":"用户名或者密码错误！"})
+        #       4.session
         from django.contrib.auth import login
-        login(request,user)
+        login(request, user)
         # 判断是否记住登录
         if remembered is not None:
             # 不为空，记住登录
@@ -165,7 +171,29 @@ class LoginView(View):
             request.session.set_expiry(0)
 
         # 6.返回响应
-        response = JsonResponse({"code":0, "msg":"OK"})
+        response = JsonResponse({"code": 0, "msg": "OK"})
         # 设置cookie , 用户首页信息展示用的cookies来获取用户名
-        response.set_cookie('username',user.username)
+        response.set_cookie('username', user.username)
         return response
+
+from django.contrib.auth import logout
+class LoginOutView(View):
+    def get(self,request):
+        logout(request)
+        response = JsonResponse({"code": 0, "errmsg": "ok"})
+        # 删除cookie信息，前端根据cookie信息来判断用户是否登录
+        response.delete_cookie('username')
+        return response
+
+
+# 用户中心返回json数据（前后端分离，只用json互交）
+from django.contrib.auth.mixins import LoginRequiredMixin,AccessMixin
+class LoginRequiredMixin(AccessMixin):
+    """Verify that the current user is authenticated."""
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return JsonResponse({"code": 400, "errmsg":"please go to login!"})
+        return super().dispatch(request, *args, **kwargs)
+class CenterView(LoginRequiredMixin, View):
+    def get(self,request):
+        return JsonResponse({"code": 0, "msg":"ok" })
