@@ -231,3 +231,14 @@ CORS_ORIGIN_WHITELIST = (
 # 允许所有域名跨域(优先选择) /允许跨域源 二选一 allow..：一般用这个，新出来的
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
+
+##################邮箱配置######################
+# 固定写法设置Email引擎
+EMAIL_BACKEND ='django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.163.com' # 163邮箱 SMTP 服务器地址
+EMAIL_PORT = 25 # SMTP服务的端口号
+EMAIL_HOST_USER = 'lw880699@163.com' #你的邮箱，邮件发送者的邮箱
+EMAIL_HOST_PASSWORD = 'WSRODUFFPQKKOFWO' #你申请的授权码（略）
+EMAIL_USE_TLS = False #与SMTP服务器通信时,是否启用安全模式
+
+#######################################################

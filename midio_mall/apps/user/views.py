@@ -238,9 +238,49 @@ class EmailView(LoginRequiredMixin, View):
             return JsonResponse({"code":400, "errmsg":"邮箱格式错误"})
         # 3.保存邮箱地址
         user = request.user
+        # request.user 登录用户的 实例对象
         user.email = email
         user.save()
-        # 4.发送一封激活邮件
+        # 4.发送一封激活邮件 网易：WSRODUFFPQKKOFWO
+        from django.core.mail import send_mail
+
+        # send_mail(
+        #    'Subject here',  主题
+        subject='美多商城激活邮件'
+        #    'Here is the message.', 邮件类容
+        message=""
+        html_message="点击按钮<a href='https://www.baidu.com'>激活</a>"
+        #    'from@example.com',   发件人
+        from_email='美多商城<lw880699@163.com>'
+        #    ['to@example.com'],   收件人
+        #    'recipient_list'      收件人列表
+        recipient_list=['lw880699@163.com']
+        #    fail_silently=False,
+        # )
+        # subject：邮件主题；
+        # message：邮件正文内容；
+        # from_email：发送邮件者；
+        # recipient_list：邮件接受者列表；
+        # html_message：带有标签格式的HTML文本。
+        send_mail(subject=subject,
+                  message=message,
+                  html_message=html_message,
+                  from_email=from_email,
+                  recipient_list=recipient_list)
+        """
+        1.设置邮件服务器
+            例如：163 
+                设置——>开启pop3/smpt ——>设置授权码
+        2.设置邮件发送的配置信息
+            让django的哪个类来发送邮件
+            # 固定写法设置Email引擎
+            EMAIL_BACKEND ='django.core.mail.backends.smtp.EmailBackend'
+            EMAIL_HOST = 'smtp.163.com' # 163邮箱 SMTP 服务器地址
+            EMAIL_PORT = 25 # SMTP服务的端口号
+            EMAIL_HOST_USER = 'lw880699@163.com' #你的邮箱，邮件发送者的邮箱
+            EMAIL_HOST_PASSWORD = 'None' #你申请的授权码（略）
+            EMAIL_USE_TLS = False #与SMTP服务器通信时,是否启用安全模
+        """
 
         # 5.返回响应
         return JsonResponse({'code':0,'errmas':'ok'})
