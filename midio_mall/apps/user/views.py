@@ -196,4 +196,11 @@ class LoginRequiredMixin(AccessMixin):
         return super().dispatch(request, *args, **kwargs)
 class CenterView(LoginRequiredMixin, View):
     def get(self,request):
-        return JsonResponse({"code": 0, "msg":"ok" })
+        info_data={
+            # request.user 已经登录的用户信息
+            "username": request.user.username,
+            "mobile": request.user.mobile,
+            "email": request.user.email,
+            "email_active": request.user.email_active,
+        }
+        return JsonResponse({"code": 0, "msg": "ok","info_data":info_data})

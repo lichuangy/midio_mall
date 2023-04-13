@@ -9,6 +9,6 @@ urlpatterns = [
     url(r'^register/$', RegistereView.as_view()),
     url(r'^login/', LoginView.as_view()),
     url(r'^logout/', LoginOutView.as_view()),
-    url(r'^center/', CenterView.as_view()),
+    url(r'^info/', CenterView.as_view()),
 
 ]
