@@ -244,12 +244,15 @@ class EmailView(LoginRequiredMixin, View):
         # 4.发送一封激活邮件 网易：WSRODUFFPQKKOFWO
         from django.core.mail import send_mail
 
+        # 对html_message中的  ？  后面部分数据加密
+        from apps.user.utils import generic_email_verify_token
+        token=generic_email_verify_token(request.user.username)
         # send_mail(
         #    'Subject here',  主题
         subject='美多商城激活邮件'
         #    'Here is the message.', 邮件类容
         message=""
-        html_message="点击按钮<a href='https://www.baidu.com'>激活</a>"
+        html_message="点击按钮<a href='https://www.baidu.com/token=%s'>激活</a>" % token
         #    'from@example.com',   发件人
         from_email='美多商城<lw880699@163.com>'
         #    ['to@example.com'],   收件人
@@ -262,11 +265,13 @@ class EmailView(LoginRequiredMixin, View):
         # from_email：发送邮件者；
         # recipient_list：邮件接受者列表；
         # html_message：带有标签格式的HTML文本。
+
         send_mail(subject=subject,
                   message=message,
                   html_message=html_message,
                   from_email=from_email,
                   recipient_list=recipient_list)
+
         """
         1.设置邮件服务器
             例如：163 
