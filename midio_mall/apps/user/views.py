@@ -28,7 +28,7 @@ from django.shortcuts import render
 # Create your views here.
 
 from django.views import View
-from apps.user.models import User
+from apps.user.models import User, Address
 from django.http import JsonResponse
 import re
 
@@ -374,3 +374,78 @@ class EmailVerifyView(View):
         # 4.
         # 5.
 """
+
+"""
+    需求：
+        新增收获地址
+    
+    前端：
+        当用户填写完地址信息，点击增加按钮后，发送axios请求，携带填写的信息    
+    后端
+        请求          接收请求，获取参数
+        业务逻辑       接收数据，数据入库
+        响应          返回响应
+        
+    路由   PosT /address/create/
+    步骤
+        # 1.接收数据
+        # 2.获取参数，验证参数
+        # 3.数据入库
+        # 4.返回响应
+        # 5.
+"""
+
+class AddressCreateView(LoginRequiredMixin,View):
+    def post(self,request):
+        # 1.接收数据
+        data = json.loads(request.body.decode())
+        # 2.获取参数，验证参数
+        receiver = data.get("receiver")
+        province_id = data.get("province_id")
+        city_id = data.get("city_id")
+        district_id = data.get("district_id")
+        place = data.get("place")
+        mobile = data.get("mobile")
+        tel = data.get("tel")
+        email = data.get("email")
+
+        user = request.user
+        # 验证参数
+        if not all([receiver, province_id, city_id, district_id, place, mobile]):
+            return http.HttpResponseBadRequest('缺少必传参数')
+        if not re.match(r'^1[3-9]\d{9}$', mobile):
+            return http.HttpResponseBadRequest('参数mobile有误')
+        if tel:
+            if not re.match(r'^(0[0-9]{2,3}-)?([2-9][0-9]{6,7})+(-[0-9]{1,4})?$', tel):
+                return http.HttpResponseBadRequest('参数tel有误')
+        if email:
+            if not re.match(r'^[a-z0-9][\w\.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):
+                return http.HttpResponseBadRequest('参数email有误')
+        # 3.数据入库
+        address = Address.objects.create(
+            user=request.user,
+            title=receiver,
+            receiver=receiver,
+            province_id=province_id,
+            city_id=city_id,
+            district_id=district_id,
+            place=place,
+            mobile=mobile,
+            tel=tel,
+            email=email
+        )
+
+        # 新增地址成功，将新增的地址响应给前端实现局部刷新
+        address_dict = {
+            "id": address.id,
+            "title": address.title,
+            "receiver": address.receiver,
+            "province": address.province.name,
+            "city": address.city.name,
+            "district": address.district.name,
+            "place": address.place,
+            "mobile": address.mobile,
+            "tel": address.tel,
+            "email": address.email}
+         # 返回响应
+        return JsonResponse({'code': 0, 'errmsg': '新增地址成功', 'address': address_dict})
