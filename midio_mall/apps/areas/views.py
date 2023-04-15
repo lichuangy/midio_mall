@@ -75,9 +75,7 @@ class AreasView(View):
         # 3.返回响应
 """
 
-
 class CityView(View):
-
     def get(self, request, id):
         data_list = cache.get('city:%s'%id)
         if data_list is None:
