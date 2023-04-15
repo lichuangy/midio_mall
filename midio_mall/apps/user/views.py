@@ -247,31 +247,32 @@ class EmailView(LoginRequiredMixin, View):
         # 对html_message中的  ？  后面部分数据加密
         from apps.user.utils import generic_email_verify_token
         token=generic_email_verify_token(request.user.username)
-        # send_mail(
-        #    'Subject here',  主题
+
         subject='美多商城激活邮件'
-        #    'Here is the message.', 邮件类容
         message=""
-        html_message="点击按钮<a href='https://www.baidu.com/token=%s'>激活</a>" % token
-        #    'from@example.com',   发件人
+        # html_message="点击按钮<a href='https://www.baidu.com/token=%s'>激活</a>" % token
+        verify_url = "http://www.meiduo.site:8080/success_verify_email.html?token=%s"%token
+        html_message ='<p>尊敬的用户您好！</p>'\
+                    '<p>感谢您使用midio mall</p>'\
+                    '<p>您的邮箱为：%s 请点击此链接激活您的邮箱：</p>'\
+                    '<p><a href=%s>%s></a></p>' % (email, verify_url, verify_url)
         from_email='美多商城<lw880699@163.com>'
-        #    ['to@example.com'],   收件人
-        #    'recipient_list'      收件人列表
-        recipient_list=['lw880699@163.com']
-        #    fail_silently=False,
-        # )
-        # subject：邮件主题；
-        # message：邮件正文内容；
-        # from_email：发送邮件者；
-        # recipient_list：邮件接受者列表；
-        # html_message：带有标签格式的HTML文本。
+        recipient_list=['lw880699@163.com','3195792673@qq.com','1443803091@qq.com']
 
-        send_mail(subject=subject,
-                  message=message,
-                  html_message=html_message,
-                  from_email=from_email,
-                  recipient_list=recipient_list)
+        # send_mail(subject=subject,
+        #           message=message,
+        #           html_message=html_message,
+        #           from_email=from_email,
+        #           recipient_list=recipient_list
 
+        from celery_tasks.email.tasks import send_email
+        send_email.delay(
+            subject=subject,
+            message=message,
+            html_message=html_message,
+            from_email=from_email,
+            recipient_list=recipient_list
+        )
         """
         1.设置邮件服务器
             例如：163 
@@ -285,8 +286,53 @@ class EmailView(LoginRequiredMixin, View):
             EMAIL_HOST_USER = 'lw880699@163.com' #你的邮箱，邮件发送者的邮箱
             EMAIL_HOST_PASSWORD = 'None' #你申请的授权码（略）
             EMAIL_USE_TLS = False #与SMTP服务器通信时,是否启用安全模
+            
+            
+        # subject：邮件主题；
+        # message：邮件正文内容；
+        # from_email：发送邮件者；
+        # recipient_list：邮件接受者列表；
+        # html_message：带有标签格式的HTML文本。
         """
 
         # 5.返回响应
         return JsonResponse({'code':0,'errmas':'ok'})
 
+
+
+# class EmailVerifyView(View):
+#     def put(self,request):
+#         params = request.GET
+#         token = params.get('token')
+#         if token is None:
+#             return JsonResponse({'code':400,'errmsg':'参数缺失'})
+#         from apps.user.utils import check_verify_token
+#         user_id = check_verify_token(token)
+#         if user_id is None:
+#             return JsonResponse({'code':400,'errmsg':'参数缺失'})
+#         user = User.objects.get(id=user_id)
+#         user.email_active = True
+#         user.save()
+#         return JsonResponse({'code':0,'errmsg':'ok'})
+
+class EmailVerifyView(View):
+    def put(self, request):
+        # 1.接收请求
+        params = request.GET
+        # 2.获取参数
+        token = params.get('token')
+        # 3.验证参数
+        if token is None:
+            return JsonResponse({'code': 400, 'errmsg': '参数缺失'})
+        # 4.获取user_id
+        from apps.users.utils import check_verify_token
+        user_id = check_verify_token(token)
+        if user_id is None:
+            return JsonResponse({'code': 400, 'errmsg': '参数错误'})
+        # 5.根据用户id进行查询数据--------自己尝试使用request.user获取数据
+        user = User.objects.get(id=user_id)
+        # 6.修改数据
+        user.email_active = True
+        user.save()
+        # 7.返回JSON响应
+        return JsonResponse({'code': 0, 'errmsg': 'verify email is ok'})

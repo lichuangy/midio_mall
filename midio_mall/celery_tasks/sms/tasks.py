@@ -5,5 +5,5 @@
 from libs.yuntongxun.smsSDK import SendSmsVerificationCode
 from celery_tasks.celery import app
 @app.task
-def celery_send_sms——code(mobile,code):
+def celery_send_sms_code(mobile,code):
     SendSmsVerificationCode().send_message(mobile,[code,5],1)

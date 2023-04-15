@@ -40,4 +40,5 @@ urlpatterns = [
     # 导入user子应用的路由
     url(r'', include('apps.user.urls')),
     url(r'', include("apps.verifications.urls")),
+    url(r'', include("apps.areas.urls")),
 ]

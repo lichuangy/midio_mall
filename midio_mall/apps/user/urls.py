@@ -1,6 +1,7 @@
 from django.conf.urls import url
 
 from apps.user.views import UsernameCountView, RegistereView,LoginView,LoginOutView,CenterView,EmailView
+from apps.user.views import EmailVerifyView
 
 urlpatterns = [
     # url(r'^admin/', admin.site.urls),
@@ -11,5 +12,6 @@ urlpatterns = [
     url(r'^logout/', LoginOutView.as_view()),
     url(r'^info/', CenterView.as_view()),
     url(r'^emails/', EmailView.as_view()),
+    url(r'^emails/verification/', EmailVerifyView.as_view()),
 
 ]
