@@ -1,7 +1,8 @@
 from django.conf.urls import url
 
 from apps.user.views import UsernameCountView, RegistereView,LoginView,LoginOutView,CenterView,EmailView
-from apps.user.views import EmailVerifyView,AddressCreateView
+from apps.user.views import EmailVerifyView,AddressCreateView,AddressView\
+    # ,UpdataView
 
 urlpatterns = [
     # url(r'^admin/', admin.site.urls),
@@ -14,5 +15,7 @@ urlpatterns = [
     url(r'^emails/', EmailView.as_view()),
     url(r'^emails/verification/', EmailVerifyView.as_view()),
     url(r'^addresses/create/', AddressCreateView.as_view()),
+    url(r'^addresses/(?P<address_id>\d+)/', AddressView.as_view()),
+    # url(r'^addresses/(?P<address_id>\d+)/$', UpdataView.as_view()),
 
 ]
