@@ -41,4 +41,5 @@ urlpatterns = [
     url(r'', include('apps.user.urls')),
     url(r'', include("apps.verifications.urls")),
     url(r'', include("apps.areas.urls")),
+    url(r'', include("apps.goods.urls")),
 ]
