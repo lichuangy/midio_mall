@@ -155,3 +155,4 @@ class SearchView(SearchView):
             })
         # 这里后端需求的数据中，只需求了相关数据，并没有要求code和errmsg
         return JsonResponse(sku_list, safe=False)
+    # HAYSTACK_SEARCH_RESULTS_PER_PAGE = 5  # 设置分页，每页显示五条
