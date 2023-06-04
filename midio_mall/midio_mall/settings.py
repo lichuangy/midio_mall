@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'apps.verifications',
     'apps.goods',
     'apps.contents',
+    'haystack', # 全文检索
 ]
 
 MIDDLEWARE = [
@@ -245,3 +246,23 @@ EMAIL_HOST_PASSWORD = 'WSRODUFFPQKKOFWO' #你申请的授权码（略）
 EMAIL_USE_TLS = False #与SMTP服务器通信时,是否启用安全模式
 
 #######################################################
+
+#指定自定义的DJANGO文集存储类
+DEFAULT_FILE_STORAGE = 'utils.fastdfs.storage.MyStorage'
+
+
+
+#######################  haystack  ##########################
+
+# Haystack
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+        'URL': 'http://192.168.44.130:9200/', # Elasticsearch服务器ip地址，端口号固定为9200
+        'INDEX_NAME': 'midio_mall', # Elasticsearch建立的索引库的名称
+    },
+}
+
+# 当添加、修改、删除数据时，自动生成索引
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+

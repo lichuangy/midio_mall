@@ -1,0 +1,5 @@
+#模板 指定字段 object代表 要检索的模型实例object = SKU()
+
+{{ object.id }}
+{{ object.name }}
+{{ object.caption }}
