@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'apps.goods',
     'apps.contents',
     'haystack', # 全文检索
+    'django_crontab',
 ]
 
 MIDDLEWARE = [
@@ -269,5 +270,31 @@ HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 # 设置搜索的内容每页多少条
 HAYSTACK_SEARCH_RESULTS_PER_PAGE = 5 #每页五条
 
-#########################################################
+######################crons################################
+
+# ################################ 定时任务  #######################
+# 元素的 第一个参数为 周期     元素的 第二个参数为定时任务
+# M：分钟（0-59）    每分钟用 * 或者 */1 表示
+# H：小时（0-23）    0表示0点
+# D：天（1-31）
+# m：月（1-12）
+# d：一星期内的天（0-6）     0为星期日
+# 分 时 日 月 周
+# '>>' + os.path.join(BASE_DIR, 'logs/crontab.log'      为生成日志
+CRONJOBS = [
+    # 1分钟执行一次  注意该处添加定时任务的时候，不需要添加 函数中的()
+    ('*/1 * * * *','apps.contents.crons.generic_meiduo_index', '>>' + os.path.join(BASE_DIR, 'logs/crontab.log'))
+]
+# 解决crontab中文问题，如果出现非英文字符会出现字符异常错误
+CRONTAB_COMMAND_PREFIX = 'LANG_ALL=zh_cn.UTF-8'
+# 第一部分为定时任务的执行间隔，第二部分为任务执行文件路径，第三部分为日志路径
+# (在服务器运行的时候，可以在django目录写个py文件去测试第三部分的拼接是什么，方便到时候找日志)
+
+
+
+
+
+
+
+
 

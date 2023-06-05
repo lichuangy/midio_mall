@@ -11,7 +11,7 @@ from django.shortcuts import render
 
 # 首页商品展示的实现
 from django.views import View
-from utils.goods import get_categories
+from utils.goods import get_categories, get_goods_specs
 from apps.contents.models import ContentCategory
 class IndexView(View):
     """首页广告"""
@@ -156,3 +156,39 @@ class SearchView(SearchView):
         # 这里后端需求的数据中，只需求了相关数据，并没有要求code和errmsg
         return JsonResponse(sku_list, safe=False)
     # HAYSTACK_SEARCH_RESULTS_PER_PAGE = 5  # 设置分页，每页显示五条
+
+
+# 商品详细页面
+
+"""
+详细页面需要静态实现
+
+1.分类数据
+2.面包屑
+3.SKU信息
+4.规格信息
+
+"""
+from utils.goods import get_categories
+
+class DetailView(View):
+    def get(self,request,sku_id):
+        try:
+            sku = SKU.objects.get(id=sku_id)
+        except SKU.DoseNoteExist:
+            pass
+        # 1.分类数据
+        categories = get_categories()
+        sku.default_image_url = 'http://192.168.44.130:8888/'+sku.default_image_url
+        # 2.面包屑
+        breadcrumb = get_breadcrumb(sku.category)
+        # 3.SKU信息
+        # 4.规格信息
+        good_specs = get_goods_specs(sku)
+        content = {
+            'categories': categories,
+            'breadcrumb': breadcrumb,
+            'sku': sku,
+            'specs': good_specs,
+        }
+        return render(request,'detail.html',content)
