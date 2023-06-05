@@ -1,3 +1,6 @@
+import json
+
+import redis
 from django.shortcuts import render
 
 # Create your views here.
@@ -243,3 +246,5 @@ class CategoryVisitCountView(View):
             gvc.save()
         # 6.返回响应
         return JsonResponse({'code': 0, 'errmsg': 'ok'})
+
+

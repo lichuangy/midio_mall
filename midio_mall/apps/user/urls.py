@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
 from apps.user.views import UsernameCountView, RegistereView,LoginView,LoginOutView,CenterView,EmailView
-from apps.user.views import EmailVerifyView,AddressCreateView,AddressView\
+from apps.user.views import EmailVerifyView,AddressCreateView,AddressView, UserHistoryView
     # ,UpdataView
 
 urlpatterns = [
@@ -17,5 +17,8 @@ urlpatterns = [
     url(r'^addresses/create/', AddressCreateView.as_view()),
     url(r'^addresses/(?P<address_id>\d+)/', AddressView.as_view()),
     # url(r'^addresses/(?P<address_id>\d+)/$', UpdataView.as_view()),
+
+    # 浏览历史记录
+    url('browse_histories/', UserHistoryView.as_view()),
 
 ]

@@ -1,10 +1,13 @@
 import json
 import re
 import json
+
+import redis
 from django.contrib.auth.forms import User
 from django.db.models import Q
 
 from django.shortcuts import render
+from django_redis import get_redis_connection
 
 """
 前端：当用户输入用户名后，失去焦点，发送axios(ajax)请求
@@ -564,3 +567,118 @@ class AddressView(LoginRequiredJSOMixin, View):
         return JsonResponse({'code': 0, 'errmsg': 'display address info is ok',
                              'addresses': address_list})
 
+
+########################## 最近浏览记录 #################
+"""
+一 根据页面效果，分析需求
+    1.最近浏览记录 只有登录用户才可以访问 只记录登录用户的浏览信息
+    2.浏览记录应该有顺序
+    3.没有分页
+
+二 功能
+    功能：
+        1：在用户访问商品详情的时候，添加浏览记录
+        2：在个人中心，展示浏览记录
+
+三 具体分析
+    问题1：保存那些数据？用户id，商品id，顺序（访问时间）---根据商品id来进行查询
+    问题2：保存在哪里？一般要保存在数据库（缺点：慢，会频繁操作数据库）
+                    最好保存在redis中
+        保存在两个库中都可以，看公司具体的安排，服务器内存比较大，mysql + redis
+
+    user_id,sku_id,顺序
+
+    redis： 5中数据类型
+    key：value
+
+    string：x
+    hash：x
+    list：v（去重，不能重复）
+    set：x
+    zset：权重：值
+"""
+"""
+添加浏览记录：
+    前端：当登录用户，访问某一个具体SKU页面的时候，发送一个axios请求，请求携带sku_id
+    后端：
+        请求：接收请求，获取请求参数，验证参数
+        业务逻辑：连接redis，先去重，再保存到redis中，redis中只保存5条记录
+        响应：返回JSON
+        路由： POST browse_histories
+        步骤：
+            1：接收请求
+            2：获取请求参数
+            3：验证参数
+            4：连接redis       list
+            5：去重
+            6：保存到redis中
+            7：只保存5条记录
+            8：返回响应
+"""
+# 添加 用户浏览商品记录
+
+from utils.views import LoginRequiredJSOMixin
+from apps.goods.models import SKU
+class UserHistoryView(LoginRequiredJSOMixin,View):
+    def post(self,request):
+        # 1：接收请求
+        user = request.user
+        # 2：获取请求参数
+        data = json.loads(request.body.decode())
+        sku_id = data.get('sku_id')
+        # 3：验证参数
+        try:
+            sku = SKU.objects.get(id=sku_id)
+        except SKU.DoseNotExist:
+            return JsonResponse({'code':400,'errmsg':'商品不存在！'})
+        # 4：连接redis
+        # list
+
+        redis_cli = get_redis_connection('history')
+        # 5：去重(先删除再保存）
+        try:
+            redis_cli.lrem('history_%s' % user.id, 0, sku_id)
+        finally:
+            # 6：保存到redis中
+            redis_cli.lpush('history_%s' % user.id, sku_id)
+            # 7：只保存5条记录
+            redis_cli.ltrim('history_%s' % user.id, 0, 4)
+            # 8：返回响应
+            return JsonResponse({'code': 0, 'errmsg': 'ok'})
+
+    def get(self, request):
+        # 1.连接redis
+        redis_cli = get_redis_connection('history')
+        # 2.获取redis数据
+        ids = redis_cli.lrange('history_%s' % request.user.id, 0, 4)
+        # 3.根据商品id进行数据查询
+        history_list = []
+        for sku_id in ids:
+            sku = SKU.objects.get(id=sku_id)
+         # 4.将对象转化为字典
+            history_list.append({
+                'id': sku.id,
+                'name': sku.name,
+                'default_image_url': sku.default_image.url,
+                'price': sku.price,
+                })
+        # 5.返回JSON
+        return JsonResponse({'code': 0, 'errmsg': 'set display history is ok', 'skus': history_list})
+
+    """
+    展示用户浏览记录
+        前端：
+            用户在访问浏览记录的时候，会发送axios请求，请求会携带session信息
+        后端：
+            请求：
+            业务逻辑：连接redis，获取redis数据（获取商品id），根据商品id进行查询，将对象转化为字典
+                    根据商品id进行数据查询
+            响应：JSON
+            路由：GET 与添加 浏览记录的路由相同
+            步骤：
+                1.连接redis
+                2.获取redis数据
+                3.根据商品id进行数据查询
+                4.将对象转化为字典
+                5.返回JSON
+    """
